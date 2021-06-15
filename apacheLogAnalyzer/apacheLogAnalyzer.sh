@@ -1,6 +1,17 @@
 #!/bin/bash
 
-top=3
+if [ $# -eq 0 ]
+then
+	echo "------------------------------ APACHE LOG ANALYZER ------------------------------"
+	echo "Mode of use:"
+	echo "$0 pathToLogFile [Top Targets Quantity] [Normal or Extended Mode]"
+	echo -e "\n[Top Targets Quantity] = Default 3. Number that brings the top X ips in terms of number of requests"
+	echo -e "[normal or extended mode] = Default 'normal'. In extended mode the program take a deep look in the ips. \n"
+	exit
+fi
+
+top="${2:-3}"
+extended="${3:-normal}"
 
 totalLines="$(wc -l $1 | cut -d ' ' -f1)"
 firstRegistryDate="$(head -n1 $1 | cut -d ' ' -f4-5)"
@@ -23,11 +34,23 @@ for ip in $(cat ips.txt); do
 	qtd="$(sed -e $l'q;d' qtd.txt)"	
 	firstRequestDate="$(cat $1 | grep $ip | head -n1 | cut -d ' ' -f4-5)"
 	lastRequestDate="$(cat $1 | grep $ip | tail -n1 | cut -d ' ' -f4-5)"
-
+	
 	echo -e "\tIP: $ip"
 	echo -e "\tTotal requests: $qtd"
 	echo -e "\tFirst request date: $firstRequestDate"
-	echo -e "\tLast request date: $lastRequestDate\n"
+	
+	if [[ "$extended" == "normal" ]]
+	then
+		echo -e "\tLast request date: $lastRequestDate\n"
+	else
+		echo -e "\tLast request date: $lastRequestDate"
+		methods="$(cat $1 | grep $ip | cut -d \" -f2 | cut -d ' ' -f1 | sort | uniq | grep -v ' ' | paste -d, -s)"
+		foldersAccessed="$(cat $1 | grep $ip | cut -d ']' -f2 | cut -d ' ' -f1-5 | grep 200 | cut -d ' ' -f3 | sort | uniq | grep -e '/$' | paste -d, -s)"
+		filesAccessed="$(cat $1 | cut -d ']' -f2 | cut -d ' ' -f1-5 | grep 200 | cut -d ' ' -f3 | sort | uniq | grep -v -e '/$' | paste -d, -s)"
+		echo -e "\tMethods utilized: $methods"
+		echo -e "\tFolders accessed: $foldersAccessed"
+		echo -e "\tFiles accessed: $filesAccessed\n"
+	fi
 	l="$((l+1))"
 done
 
