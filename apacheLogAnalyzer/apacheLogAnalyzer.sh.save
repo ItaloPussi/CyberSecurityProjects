@@ -2,14 +2,7 @@
 
 if [ $# -eq 0 ]
 then
-	echo "------------------------------ APACHE LOG ANALYZER ------------------------------"
-	echo "Mode of use:"
-	echo "$0 pathToLogFile [Top Targets Quantity] [Normal or Extended Mode]"
-	echo -e "\n[Top Targets Quantity] = Default 3. Number that brings the top X ips in terms of number of requests"
-	echo -e "[normal or extended mode] = Default 'normal'. In extended mode the program take a deep look in the ips. \n"
-	exit
-fi
-
+	echo "----------------- APACHE LOG ANALYZER https://dev.azure.com/kdop/Seguranca%20da%20Informacao/_workitems
 top="${2:-3}"
 extended="${3:-normal}"
 
